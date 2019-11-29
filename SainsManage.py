@@ -11,6 +11,7 @@ visit = {
 
 }
 provider = ("NCS","RPX","SICEPAT","BLIBLI","NINJA","POS","JNE")
+price = (11000,14500,13000,15000,13000,15000,12000)
 use = {
     "NCS" : False,
     "RPX" : False,
@@ -108,8 +109,8 @@ k = 0
 # masukin path x to x, dan path x to y dengan 1 edge
 for i in edge:
     k += 1
-    path.append([i[0],i[1],[i[2],]])
-    print("Path ke",k,":",i[0],",",i[1],",",i[2])
+    path.append([i[0],i[1],[i[2],],[]])
+    # print(k,":",i[0],",",i[1],",",i[2])
 
 def DFS(head,tail,vst,used,prov):
     # print(head,tail,prov)
@@ -120,10 +121,14 @@ def DFS(head,tail,vst,used,prov):
             vst[x[1]] = True
             used[x[2]] = True
             prov.append(x[2])
-            path.append( [head,x[1],prov] )
-            print("Path ke",k,":",head,",",x[1],",",prov)
+            if len(prov) == 2 : 
+                path.append( [head,x[1],prov,[tail]] )
+            # print(k,":",head,",",x[1],",",end = " ")
+            # for i in prov:
+            #     print(i, end = " ")
+            # print()
             # print(head,x[1],prov)
-            DFS(head,x[1],vst,used,prov)
+                DFS(head,x[1],vst,used,prov)
             vst[x[1]] = False
             used[x[2]] = False
             prov.pop()
@@ -139,4 +144,99 @@ for i in Kota:
             use[x[2]] = False
     visit[i] = False
 
-# print(path)
+Order = []
+n = int(input())
+for i in range(n):
+    inp = input().split()
+    Order.append((inp[0],inp[1],int(inp[2]),float(inp[3])))
+
+Condition = {}
+for i in range(len(Order)) :
+    for j in range(len(path)):
+        Condition[(i,j)] = ((Order[i][0] == path[j][0]) and (Order[i][1] == path[j][1]))
+# Order.sort()
+currW = {
+    "NCS" : 0.0,
+    "RPX" : 0.0,
+    "SICEPAT" : 0.0,
+    "BLIBLI" : 0.0,
+    "NINJA" : 0.0,
+    "POS" : 0.0,
+    "JNE" : 0.0
+}
+currR = {
+    "NCS" : 0,
+    "RPX" : 0,
+    "SICEPAT" : 0,
+    "BLIBLI" : 0,
+    "NINJA" : 0,
+    "POS" : 0,
+    "JNE" : 0
+}
+capacity = {
+    "NCS" : 65,
+    "RPX" : 100,
+    "SICEPAT" : 100,
+    "BLIBLI" : 375,
+    "NINJA" : 250,
+    "POS" : 320,
+    "JNE" : 630
+}
+maxrequest = {
+    "NCS" : 150,
+    "RPX" : 150,
+    "SICEPAT" : 600,
+    "BLIBLI" : 800,
+    "NINJA" : 1350,
+    "POS" : 1470,
+    "JNE" : 3500
+}
+price = {
+    "NCS" : 11000,
+    "RPX" : 14500,
+    "SICEPAT" : 13000,
+    "BLIBLI" : 15000,
+    "NINJA" : 13000,
+    "POS" : 15000,
+    "JNE" : 12000
+}
+dp = {}
+def pickPath(i,cost,sent):
+    global n,path,Order,Condition,currW,currR,capacity,maxrequest,price,dp
+    if i >= n : return [cost,sent]
+    if ((i,currW["NCS"],currW["RPX"],currW["SICEPAT"],currW["BLIBLI"],currW["NINJA"],currW["POS"],currW["JNE"],currR["NCS"],currR["RPX"],currR["SICEPAT"],currR["BLIBLI"],currR["NINJA"],currR["POS"],currR["JNE"])) in dp : 
+        return dp[(i,currW["NCS"],currW["RPX"],currW["SICEPAT"],currW["BLIBLI"],currW["NINJA"],currW["POS"],currW["JNE"],currR["NCS"],currR["RPX"],currR["SICEPAT"],currR["BLIBLI"],currR["NINJA"],currR["POS"],currR["JNE"])]
+    ans = [cost,sent]
+    for j in range(len(path)):
+        if ((i,j) in Condition and Condition[(i,j)]):
+            bisa = True
+            for k in path[j][2]:
+                if (currW[k]+Order[i][3] > capacity[k] or currR[k]+Order[i][2] > maxrequest[k]):
+                    bisa = False
+            if bisa:
+                updtCost = 0
+                for k in path[j][2]:
+                    currW[k] += Order[i][3]
+                    currR[k] += Order[i][2]
+                    updtCost += Order[i][3] * price[k]
+                tmp = pickPath(i+1,cost + updtCost,sent+1)
+                if (tmp[1] > ans[1] or (tmp[1] == ans[1] and tmp[0] < ans[0])) : 
+                    ans = tmp
+                for k in path[j][2]:
+                    currW[k] -= Order[i][3]
+                    currR[k] -= Order[i][2]
+    tmp = pickPath(i+1,cost,sent)
+    if (tmp[1] > ans[1] or (tmp[1] == ans[1] and tmp[0] < ans[0])) : 
+        ans = tmp
+    print(ans)
+    dp[(i,currW["NCS"],currW["RPX"],currW["SICEPAT"],currW["BLIBLI"],currW["NINJA"],currW["POS"],currW["JNE"],currR["NCS"],currR["RPX"],currR["SICEPAT"],currR["BLIBLI"],currR["NINJA"],currR["POS"],currR["JNE"])] = ans
+    return dp[(i,currW["NCS"],currW["RPX"],currW["SICEPAT"],currW["BLIBLI"],currW["NINJA"],currW["POS"],currW["JNE"],currR["NCS"],currR["RPX"],currR["SICEPAT"],currR["BLIBLI"],currR["NINJA"],currR["POS"],currR["JNE"])]
+
+ans = pickPath(0,0,0)
+print(ans)
+# for i in range (n-1):
+#     tmp = pickPath(i+1,0,0)
+#     print(tmp)
+#     if (tmp[1] > ans[1] or (tmp[1] == ans[1] and tmp[0] < ans[0])) : 
+#         ans = tmp
+print("Cost termurah adalah =",ans[0],"dengan jumlah order terkirim",ans[1])
