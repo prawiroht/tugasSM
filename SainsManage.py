@@ -1,3 +1,7 @@
+import time
+
+start = time.time()
+
 Kota = ("Jakarta","Bogor","Depok","Bandung","Semarang","Yogyakarta","Surabaya","Malang")
 visit = {
     "Jakarta" : False,
@@ -201,8 +205,10 @@ price = {
     "JNE" : 12000
 }
 dp = {}
+xxx = [0,-1]
+ite = 0
 def pickPath(i,cost,sent):
-    global n,path,Order,Condition,currW,currR,capacity,maxrequest,price,dp
+    global n,path,Order,Condition,currW,currR,capacity,maxrequest,price,dp,xxx,ite
     if i >= n : return [cost,sent]
     if ((i,currW["NCS"],currW["RPX"],currW["SICEPAT"],currW["BLIBLI"],currW["NINJA"],currW["POS"],currW["JNE"],currR["NCS"],currR["RPX"],currR["SICEPAT"],currR["BLIBLI"],currR["NINJA"],currR["POS"],currR["JNE"])) in dp : 
         return dp[(i,currW["NCS"],currW["RPX"],currW["SICEPAT"],currW["BLIBLI"],currW["NINJA"],currW["POS"],currW["JNE"],currR["NCS"],currR["RPX"],currR["SICEPAT"],currR["BLIBLI"],currR["NINJA"],currR["POS"],currR["JNE"])]
@@ -228,7 +234,12 @@ def pickPath(i,cost,sent):
     tmp = pickPath(i+1,cost,sent)
     if (tmp[1] > ans[1] or (tmp[1] == ans[1] and tmp[0] < ans[0])) : 
         ans = tmp
-    print(ans)
+    if(xxx[1] < ans[1] or (xxx[1] == ans[1] and xxx[0] > ans[0])):
+        xxx = ans
+    ite += 1
+    if ite % 1000000 == 0 :
+        print("Pengiriman optimal saat ini : terkirim", xxx[1],"dengan cost",xxx[0])
+        print("Running time :", time.time()-start, "seconds")
     dp[(i,currW["NCS"],currW["RPX"],currW["SICEPAT"],currW["BLIBLI"],currW["NINJA"],currW["POS"],currW["JNE"],currR["NCS"],currR["RPX"],currR["SICEPAT"],currR["BLIBLI"],currR["NINJA"],currR["POS"],currR["JNE"])] = ans
     return dp[(i,currW["NCS"],currW["RPX"],currW["SICEPAT"],currW["BLIBLI"],currW["NINJA"],currW["POS"],currW["JNE"],currR["NCS"],currR["RPX"],currR["SICEPAT"],currR["BLIBLI"],currR["NINJA"],currR["POS"],currR["JNE"])]
 
